@@ -4,6 +4,9 @@ import time
 import json
 from lxml import etree
 import re
+requests.adapters.DEFAULT_RETRIES = 5 # 增加重连次数
+s = requests.session()
+s.keep_alive = False
 def legal(s):
 	s = s.replace(' ','')
 	s = s.replace('(','')
@@ -73,4 +76,7 @@ if __name__=="__main__":
 	}
 	url = "https://item.jd.com/100003395467.html"
 	args = 'test'
-	one_phone(args,url,headers)
+	#row = one_phone(args,url,headers)
+	json = get_json_dict('100003395467',headers)
+	print(json)
+	#print(row)

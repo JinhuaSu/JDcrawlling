@@ -78,7 +78,7 @@ if __name__ == '__main__':
 	endPage = int(args.end)
 	url = "https://search.jd.com/Search?keyword=%E6%89%8B%E6%9C%BA&enc=utf-8"
 	global mysql_tool
-	mysql_tool = mysql_tool(args,'localhost','root','20192019_yhf',3306,'spiders')
+	mysql_tool = mysql_tool(args,'localhost','root','20192019_yhf',3306,'spiders',logger=logger)
 	global phone_num
 	phone_num = 1
 	global tmp_dict

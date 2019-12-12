@@ -9,7 +9,7 @@ def legal(s):
 	s = s.replace('/','')
 	return s 
 class mysql_tool(object):
-	def __init__(self,args, host, user,passwd,port,db):
+	def __init__(self,args, host, user,passwd,port,db,logger = None):
 		self.args = args
 		self.db = pymysql.connect(host=host,user=user,password=passwd,port=port,database=db)
 		with open(args.map_file,'rb') as f:
@@ -18,6 +18,7 @@ class mysql_tool(object):
 			self.columns = pickle.load(f)
 		self.columns.remove('网络频率（2G/3G）')
 		self.auto_create_table(self.columns,args.table_name)
+		self.logger = logger
 		
 	def auto_create_table(self,columns,name):
 		sql = 'CREATE TABLE IF NOT EXISTS %s (' % name
@@ -45,7 +46,7 @@ class mysql_tool(object):
 				elif key != '网络频率（2G/3G）' and key in self.map.keys() and self.map[key]!= None and new_row[self.map[key]] == None:
 					new_row[legal(self.map[key])] = value
 			except:
-				print('keyErorr:',key)
+				self.logger.info('keyErorr:',key)
 		keys = ', '.join(new_row.keys())
 		values = ', '.join(['%s']*len(new_row))
 		sql='INSERT INTO {table} ({keys}) VALUES ({values}) ON DUPLICATE KEY UPDATE'.format(table = table,keys =keys,values = values)
@@ -55,10 +56,10 @@ class mysql_tool(object):
 		try:
 			cursor.execute(sql,tuple(list(new_row.values())+list(new_row.values())))
 			self.db.commit()
-			print('save data successful')
+			self.logger.info('save data successful')
 		except:
-			print('save data failed')
-			print(sql)
+			self.logger.info('save data failed')
+			self.logger.info(sql % tuple(list(new_row.values())+list(new_row.values())))
 			self.db.rollback()
 		cursor.close()
 if __name__ == '__main__':
