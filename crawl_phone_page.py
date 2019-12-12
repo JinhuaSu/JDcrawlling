@@ -3,6 +3,7 @@ import requests
 import time 
 import json
 from lxml import etree
+import pickle
 import re
 requests.adapters.DEFAULT_RETRIES = 5 # 增加重连次数
 s = requests.session()
@@ -76,7 +77,7 @@ if __name__=="__main__":
 	}
 	url = "https://item.jd.com/100003395467.html"
 	args = 'test'
-	#row = one_phone(args,url,headers)
-	json = get_json_dict('100003395467',headers)
-	print(json)
-	#print(row)
+	row = one_phone(args,url,headers)
+	print(row)
+	with open('result/row.pk','wb') as f:
+		pickle.dump(row,f)

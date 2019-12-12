@@ -55,7 +55,7 @@ def load_page(args,url):
 		logger.info('trying to crawling No. %s phone info...' % phone_num )
 		phone_num += 1
 		row = one_phone(args,new_url,headers)
-		print(len(row))
+		logger.info('succeed in crawling %s feature' % len(row))
 		if args.mode == 'debug':
 			tmp_dict[row['UNIKEY']] = row
 		else:

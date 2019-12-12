@@ -56,6 +56,7 @@ class mysql_tool(object):
 		try:
 			cursor.execute(sql,tuple(list(new_row.values())+list(new_row.values())))
 			self.db.commit()
+			self.logger.info(sql % tuple(list(new_row.values())+list(new_row.values())))
 			self.logger.info('save data successful')
 		except:
 			self.logger.info('save data failed')
