@@ -7,6 +7,8 @@ def legal(s):
 	s = s.replace('（','')
 	s = s.replace('）','')
 	s = s.replace('/','')
+	s = s.replace('+','')
+	s = s.replace('-','')
 	return s 
 class mysql_tool(object):
 	def __init__(self,args, host, user,passwd,port,db,logger = None):
@@ -16,7 +18,11 @@ class mysql_tool(object):
 			self.map = pickle.load(f)
 		with open(args.columns_file,'rb') as f:
 			self.columns = pickle.load(f)
-		self.columns.remove('网络频率（2G/3G）')
+		if args.mode == 'sparse_table':
+			self.columns = [x for x in self.map.keys() if x not in self.columns]	
+			self.columns.insert(0,'UNIKEY')
+		else:
+			self.columns.remove('网络频率（2G/3G）')#bigger than the max string length
 		self.auto_create_table(self.columns,args.table_name)
 		self.logger = logger
 		
@@ -43,7 +49,7 @@ class mysql_tool(object):
 			try:
 				if key in self.columns:
 					new_row[legal(key)] = value
-				elif key != '网络频率（2G/3G）' and key in self.map.keys() and self.map[key]!= None and new_row[self.map[key]] == None:
+				elif key in self.map.keys() and self.map[key] in self.columns and new_row[legal(self.map[key])] == None:
 					new_row[legal(self.map[key])] = value
 			except:
 				self.logger.info('keyErorr:',key)

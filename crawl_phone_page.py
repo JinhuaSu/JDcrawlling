@@ -53,15 +53,19 @@ def one_phone(args,url,headers):
 		store = content.xpath('//div[@class="item"]/div[@class="name"]/a/text()')[0]
 	except:
 		store = None
-	print(store)
+	comment = content.xpath("//div[@class='comment-item']//p[@class='comment-con']//text()")
 	detail_key = content.xpath('//dl[@class="clearfix"]//dt/text()')
 	detail_value = content.xpath('//dl[@class="clearfix"]//dd[last()]/text()')
+	
 	#detail = get_detail_dict(detail)
 	detail = dict(zip(detail_key,detail_value))
 	json_dic = get_json_dict(ID,headers)
 	json_dic.update(detail)
 	res_dic = {"UNIKEY":ID,'url':url,'store':store}
 	res_dic.update(json_dic)
+	print(res_dic)
+	print(comment)
+	print(comment[0])
 	return res_dic
 
 if __name__=="__main__":
@@ -71,11 +75,11 @@ if __name__=="__main__":
 	'Accept-Language': 'en-US,en;q=0.8,zh-CN;q=0.5,zh;q=0.3',
 	'Referer': 'https://www.jd.com/',
 	'DNT': '1',
-	'Connection': 'keep-alive',
+	#'Connection': 'keep-alive',
 	'Upgrade-Insecure-Requests': '1',
 	'TE': 'Trailers',
 	}
-	url = "https://item.jd.com/100003395467.html"
+	url = "https://item.jd.com/100010422126.html"
 	args = 'test'
 	row = one_phone(args,url,headers)
 	print(row)

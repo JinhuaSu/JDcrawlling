@@ -10,12 +10,34 @@ import pickle
 from util.logging import logger,init_logger
 
 def jdPhone_spider(args,url,beginPage,endPage):
-	for page in range(beginPage,endPage+1):
-		pn = page*2 - 1
-		print("crawlling No,",page,"page")
-		fullurl = url+"&page="+str(pn)
-		time.sleep(2)
-		load_page(args,fullurl)
+	if args.mode == 'update':
+		global phone_num
+		headers = {
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0',
+		'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+		'Accept-Language': 'en-US,en;q=0.8,zh-CN;q=0.5,zh;q=0.3',
+		'Referer': 'https://www.jd.com/',
+		'DNT': '1',
+		#'Connection': 'keep-alive',
+		'Upgrade-Insecure-Requests': '1',
+		'TE': 'Trailers',
+		}
+		with open(args.update_file,'rb') as f:
+			update_list = pickle.load(f)
+		for ID in update_list:
+			new_url = 'https://item.jd.com/' + str(ID) + '.html'
+			row = one_phone(args,new_url,headers)
+			logger.info('succeed in crawling %s feature' % len(row))
+			mysql_tool.auto_save_data(row,args.table_name)
+			phone_num += 1
+	else:
+		for page in range(beginPage,endPage+1):
+			pn = page*2 - 1
+			page_num = page
+			logger.info("crawlling No,"+str(page)+"page")
+			fullurl = url+"&page="+str(pn)
+			time.sleep(2)
+			load_page(args,fullurl)
 
 def load_page(args,url):
 	global mysql_tool
@@ -27,7 +49,7 @@ def load_page(args,url):
 	'Accept-Language': 'en-US,en;q=0.8,zh-CN;q=0.5,zh;q=0.3',
 	'Referer': 'https://www.jd.com/',
 	'DNT': '1',
-	'Connection': 'keep-alive',
+	#'Connection': 'keep-alive',
 	'Upgrade-Insecure-Requests': '1',
 	'TE': 'Trailers',
 	}
@@ -63,8 +85,9 @@ def load_page(args,url):
 			phone_num += 1
 
 parser = argparse.ArgumentParser(description='A3C')
-parser.add_argument('--mode',default ='crawl',choices=['crawl','debug'])
+parser.add_argument('--mode',default ='crawl',choices=['crawl','debug','update','sparse_table'])
 parser.add_argument('--log_file',default ='logs/output')
+parser.add_argument('--update_file',default ='result/update_list.pk')
 parser.add_argument('--map_file',default ='result/map_dict.pk')
 parser.add_argument('--columns_file',default ='result/major_list.pk')
 parser.add_argument('--table_name',default ='JDphone_raw')
@@ -83,7 +106,16 @@ if __name__ == '__main__':
 	phone_num = 1
 	global tmp_dict
 	tmp_dict = {}
-	jdPhone_spider(args,url,beginPage,endPage)
+	global page_num
+	page_num = args.begin
+	if args.mode in ['crawl','sparse_table']:
+		while page_num <= args.end:
+			try:
+				jdPhone_spider(args,url,beginPage,endPage)
+			except:
+				logger.info('trying connect again!')
+	else:
+		jdPhone_spider(args,url,beginPage,endPage)
 	if args.mode == 'debug':
 		with open('result/debug.pk','wb') as f:
 			pickle.dump(tmp_dict,f)
