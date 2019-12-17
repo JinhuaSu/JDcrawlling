@@ -27,14 +27,18 @@ while True:
 	print(cursor.execute(sql))
 	UNIKEY = cursor.fetchone()[0]
 	print(UNIKEY)
-	response = requests.get(url % UNIKEY,headers=headers)
-	dic = json.loads(response.text[24:-2])
-	data = ','.join([item['name']+':'+str(item['count']) for item in dic['hotCommentTagStatistics']])
-	print(data)
-	sql2 = "update JDphone_comment set HOTWORDS=%s WHERE UNIKEY=%s;"
-	print(cursor.execute(sql2, (data,UNIKEY)))
-	db.commit()
-#request = urllib.request.Request(url,headers=headers)
+	try:
+		response = requests.get(url % UNIKEY,headers=headers)
+		dic = json.loads(response.text[24:-2])
+		data = ','.join([item['name']+':'+str(item['count']) for item in dic['hotCommentTagStatistics']])
+		print(data)
+		sql2 = "update JDphone_comment set HOTWORDS=%s WHERE UNIKEY=%s;"
+		print(cursor.execute(sql2, (data,UNIKEY)))
+		db.commit()
+	except:
+		print('fail!')
+		
+	#request = urllib.request.Request(url,headers=headers)
 #html = urllib.request.urlopen(request).read()
 #print(html)
 #content = etree.HTML(html) 
